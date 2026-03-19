@@ -1,0 +1,13 @@
+node_modules
+**/node_modules
+.git
+.github
+.nixpacks
+dist
+build
+session
+**/session
+downloads
+**/downloads
+yt-dlp.exe
+*.log
