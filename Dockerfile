@@ -20,8 +20,8 @@ WORKDIR /app
 # Copy the entire application First
 COPY . .
 
-# Install dependencies
-RUN pnpm install
+# Install dependencies silently to prevent Railway CLI from crashing
+RUN pnpm install --reporter=append-only
 
 # Build everything
 RUN pnpm run build --if-present
