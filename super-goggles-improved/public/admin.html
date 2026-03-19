@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Super Goggles Bot — Admin Panel</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d27;
+      --border: #2d3147;
+      --accent: #25d366;
+      --danger: #e74c3c;
+      --warn: #f39c12;
+      --text: #e8eaf6;
+      --muted: #8b92b2;
+      --input-bg: #12141e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+    /* ── Login screen ─────────────────────────────────────────── */
+    #login-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 1rem;
+    }
+    .login-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%; max-width: 360px;
+      text-align: center;
+    }
+    .login-box .logo { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .login-box h1 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .login-box p { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .login-box input {
+      width: 100%; padding: 0.7rem 1rem;
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 0.95rem;
+      margin-bottom: 0.75rem; outline: none;
+      transition: border-color 0.2s;
+    }
+    .login-box input:focus { border-color: var(--accent); }
+    .login-box button {
+      width: 100%; padding: 0.75rem;
+      background: var(--accent); color: #000;
+      border: none; border-radius: 8px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .login-box button:hover { opacity: 0.88; }
+    #login-error {
+      color: var(--danger); font-size: 0.85rem;
+      margin-top: 0.75rem; min-height: 1.2em;
+    }
+
+    /* ── Dashboard ────────────────────────────────────────────── */
+    #dashboard { display: none; }
+
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1.5rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    header h1 { font-size: 1.15rem; font-weight: 700; flex: 1; }
+    .badge {
+      background: var(--accent); color: #000;
+      border-radius: 4px; padding: 2px 10px;
+      font-size: 0.75rem; font-weight: 700;
+    }
+    .badge.offline { background: var(--danger); color: #fff; }
+
+    main {
+      max-width: 1080px; margin: 0 auto;
+      padding: 1.5rem 1rem;
+      display: grid; gap: 1.25rem;
+      grid-template-columns: 1fr 1fr;
+    }
+    @media (max-width: 640px) { main { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.25rem;
+    }
+    .card h2 {
+      font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.9rem;
+    }
+    .card.full { grid-column: 1 / -1; }
+
+    .stat { display: flex; justify-content: space-between; padding: 0.35rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .stat:last-child { border-bottom: none; }
+    .stat .label { color: var(--muted); }
+    .stat .value { font-weight: 600; }
+    .green { color: var(--accent); }
+    .red { color: var(--danger); }
+
+    /* QR */
+    #qr-wrap { text-align: center; }
+    #qr-canvas { display: none; border-radius: 8px; }
+    #qr-msg { color: var(--muted); font-size: 0.85rem; margin-top: 0.6rem; line-height: 1.5; }
+
+    /* Actions */
+    .actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .btn {
+      border: none; border-radius: 8px;
+      padding: 0.55rem 1.1rem; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-danger  { background: var(--danger); color: #fff; }
+    .btn-warn    { background: var(--warn); color: #000; }
+    .btn-ghost   { background: var(--border); color: var(--text); }
+    #action-msg { margin-top: 0.6rem; font-size: 0.82rem; color: var(--muted); min-height: 1.1em; }
+
+    /* Logs */
+    #log-box {
+      background: #080a10; border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.85rem 1rem;
+      height: 260px; overflow-y: auto;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.77rem; line-height: 1.55; color: #a8b4d4;
+    }
+    .l-warn  { color: var(--warn); }
+    .l-error { color: var(--danger); }
+    .l-ok    { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<!-- ── Login ─────────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="logo">🤖</div>
+    <h1>Super Goggles Bot</h1>
+    <p>Admin Panel — please sign in</p>
+    <input id="u" type="text"     placeholder="Username"  autocomplete="username"/>
+    <input id="p" type="password" placeholder="Password"  autocomplete="current-password"/>
+    <button onclick="doLogin()">Sign In</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- ── Dashboard ──────────────────────────────────────────────── -->
+<div id="dashboard">
+  <header>
+    <span>🤖</span>
+    <h1>Super Goggles Bot</h1>
+    <span class="badge offline" id="hdr-badge">⬤ Offline</span>
+    <button class="btn btn-ghost" style="padding:0.3rem 0.8rem;font-size:0.8rem" onclick="doLogout()">Sign out</button>
+  </header>
+
+  <main>
+    <!-- Status -->
+    <div class="card">
+      <h2>Status</h2>
+      <div class="stat"><span class="label">Connection</span><span class="value" id="s-conn">…</span></div>
+      <div class="stat"><span class="label">Account</span><span class="value" id="s-user">…</span></div>
+      <div class="stat"><span class="label">Uptime</span><span class="value" id="s-up">…</span></div>
+      <div class="stat"><span class="label">Memory</span><span class="value" id="s-mem">…</span></div>
+    </div>
+
+    <!-- QR -->
+    <div class="card">
+      <h2>QR Code</h2>
+      <div id="qr-wrap">
+        <canvas id="qr-canvas" width="220" height="220"></canvas>
+        <p id="qr-msg">Loading…</p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="card">
+      <h2>Actions</h2>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="refresh()">🔄 Refresh</button>
+        <button class="btn btn-warn"    onclick="doAction('/api/restart','Restart the bot process?')">♻️ Restart</button>
+        <button class="btn btn-danger"  onclick="doAction('/api/logout', 'Clear WhatsApp session and re-scan QR?')">🚪 Re-pair</button>
+      </div>
+      <div id="action-msg"></div>
+    </div>
+
+    <!-- Logs -->
+    <div class="card full">
+      <h2>Recent Logs <span id="log-count" style="color:var(--muted);font-weight:400"></span></h2>
+      <div id="log-box">Loading…</div>
+    </div>
+  </main>
+</div>
+
+<script>
+  let creds = sessionStorage.getItem('bot_creds') || '';
+  let pollTimer;
+
+  // ── Auth helpers ─────────────────────────────────────────────
+  function doLogin() {
+    const u = document.getElementById('u').value.trim();
+    const p = document.getElementById('p').value;
+    if (!u || !p) { setLoginErr('Enter username and password.'); return; }
+    creds = btoa(u + ':' + p);
+    sessionStorage.setItem('bot_creds', creds);
+    // Test credentials
+    fetchJSON('/api/status').then(() => {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      startPolling();
+    }).catch(() => {
+      creds = '';
+      sessionStorage.removeItem('bot_creds');
+      setLoginErr('Invalid credentials. Try again.');
+    });
+  }
+
+  function doLogout() {
+    creds = '';
+    sessionStorage.removeItem('bot_creds');
+    clearInterval(pollTimer);
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('u').value = '';
+    document.getElementById('p').value = '';
+  }
+
+  function setLoginErr(msg) {
+    document.getElementById('login-error').textContent = msg;
+  }
+
+  // Allow Enter key to submit login
+  ['u','p'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  });
+
+  // ── API helpers ──────────────────────────────────────────────
+  async function fetchJSON(path) {
+    const res = await fetch(path, { headers: { Authorization: 'Basic ' + creds } });
+    if (res.status === 401) throw new Error('Unauthorized');
+    if (!res.ok) throw new Error(res.statusText);
+    return res.json();
+  }
+
+  async function postJSON(path) {
+    const res = await fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Basic ' + creds }
+    });
+    return res.json();
+  }
+
+  // ── QR rendering ─────────────────────────────────────────────
+  let qrLib = false;
+  async function ensureQR() {
+    if (qrLib) return;
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js';
+      s.onload = () => { qrLib = true; res(); };
+      s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  async function renderQR(data) {
+    await ensureQR();
+    const cv = document.getElementById('qr-canvas');
+    cv.style.display = 'block';
+    new QRious({ element: cv, value: data, size: 220, background: '#ffffff', foreground: '#000000' });
+  }
+
+  // ── Main refresh ─────────────────────────────────────────────
+  async function refresh() {
+    try {
+      const [status, qrData, logData] = await Promise.all([
+        fetchJSON('/api/status'),
+        fetchJSON('/api/qr'),
+        fetchJSON('/api/logs?limit=80'),
+      ]);
+
+      // Status card
+      const ok = status.connected;
+      document.getElementById('s-conn').textContent = ok ? '✅ Connected' : '❌ Disconnected';
+      document.getElementById('s-conn').className   = 'value ' + (ok ? 'green' : 'red');
+      document.getElementById('s-user').textContent = status.user || '—';
+      document.getElementById('s-up').textContent   = fmtUp(status.uptime || 0);
+      document.getElementById('s-mem').textContent  = status.memory || '—';
+
+      const badge = document.getElementById('hdr-badge');
+      badge.textContent = ok ? '⬤ Online' : '⬤ Offline';
+      badge.className   = 'badge' + (ok ? '' : ' offline');
+
+      // QR card
+      const qmsg = document.getElementById('qr-msg');
+      if (qrData.connected) {
+        qmsg.textContent = '✅ Bot is connected — no QR needed.';
+        document.getElementById('qr-canvas').style.display = 'none';
+      } else if (qrData.qr) {
+        qmsg.innerHTML = '📷 Scan in WhatsApp<br><small>Settings → Linked Devices → Link a Device</small>';
+        await renderQR(qrData.qr);
+      } else {
+        qmsg.textContent = '⏳ Waiting for QR code…';
+        document.getElementById('qr-canvas').style.display = 'none';
+      }
+
+      // Logs
+      const lines = (logData.logs || []).map(l => {
+        let cls = '';
+        if (/ERROR|error/i.test(l)) cls = 'l-error';
+        else if (/WARN|warn/i.test(l)) cls = 'l-warn';
+        else if (/Connected|✅|loaded/i.test(l)) cls = 'l-ok';
+        return `<div class="${cls}">${esc(l)}</div>`;
+      });
+      const box = document.getElementById('log-box');
+      box.innerHTML = lines.join('') || '<div>No logs yet.</div>';
+      box.scrollTop = box.scrollHeight;
+      document.getElementById('log-count').textContent = `(${(logData.logs||[]).length} lines)`;
+
+    } catch (err) {
+      if (err.message === 'Unauthorized') doLogout();
+    }
+  }
+
+  // ── Actions ───────────────────────────────────────────────────
+  async function doAction(path, confirm_msg) {
+    if (!confirm(confirm_msg)) return;
+    try {
+      const d = await postJSON(path);
+      document.getElementById('action-msg').textContent = d.message || 'Done.';
+      setTimeout(refresh, 3500);
+    } catch (e) {
+      document.getElementById('action-msg').textContent = '❌ ' + e.message;
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────
+  function fmtUp(s) {
+    return `${Math.floor(s/3600)}h ${Math.floor((s%3600)/60)}m ${s%60}s`;
+  }
+  function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function startPolling() {
+    refresh();
+    clearInterval(pollTimer);
+    pollTimer = setInterval(refresh, 5000);
+  }
+
+  // ── Auto-login if creds are stored ───────────────────────────
+  if (creds) {
+    fetchJSON('/api/status').then(() => {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      startPolling();
+    }).catch(() => {
+      creds = '';
+      sessionStorage.removeItem('bot_creds');
+    });
+  }
+</script>
+</body>
+</html>
