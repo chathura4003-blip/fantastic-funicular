@@ -3,6 +3,7 @@ FROM node:18-slim
 
 # Install system dependencies for yt-dlp and ffmpeg
 RUN apt-get update && apt-get install -y \
+    git \
     ffmpeg \
     python3 \
     python3-pip \
