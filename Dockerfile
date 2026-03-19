@@ -20,11 +20,11 @@ WORKDIR /app
 # Copy the entire application First
 COPY . .
 
-# Install dependencies silently to prevent Railway CLI from crashing
-RUN pnpm install --reporter=append-only
+# Install dependencies only for the bot to save memory
+RUN pnpm install --filter supreme-md-bot... --reporter=append-only
 
-# Build everything
-RUN pnpm run build --if-present
+# Build the bot (if applicable)
+RUN pnpm run --filter supreme-md-bot build --if-present
 
 # Set environment variables
 ENV NODE_ENV=production
