@@ -45,8 +45,11 @@ async function startBot() {
 }
 
 async function connect() {
+    logger('[Bot] Initializing session...');
     const { state: authState, saveCreds } = await initSession();
+    logger('[Bot] Fetching Baileys version...');
     const { version } = await fetchLatestBaileysVersion();
+    logger(`[Bot] Connecting to WA v${version.join('.')}...`);
 
     sock = makeWASocket({
         version,

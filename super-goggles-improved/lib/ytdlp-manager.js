@@ -61,7 +61,12 @@ async function ensureYtdlp() {
     if (fs.existsSync(localPath)) {
         BIN_PATH = localPath;
         if (!isWin) {
-            try { fs.chmodSync(BIN_PATH, 0o755); } catch {}
+            try { 
+                fs.chmodSync(BIN_PATH, 0o755); 
+                logger(`[yt-dlp] Permissions set for ${BIN_PATH}`);
+            } catch (e) {
+                logger(`[yt-dlp] Error setting permissions: ${e.message}`);
+            }
         }
         logger(`[yt-dlp] Using local bundled binary: ${BIN_PATH}`);
         return true;
@@ -128,6 +133,7 @@ function getYtdlp() {
             const isWin = process.platform === 'win32';
             BIN_PATH = isWin ? path.join(__dirname, '..', 'yt-dlp.exe') : path.join('/tmp', 'yt-dlp');
         }
+        logger(`[yt-dlp] Initializing YTDlpWrap with path: ${BIN_PATH}`);
         _ytdlp = new YTDlpWrap(BIN_PATH);
     }
     return _ytdlp;
