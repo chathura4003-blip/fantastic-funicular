@@ -10,6 +10,7 @@ on:
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+    timeout-minutes: 360 # GitHub Action max duration (6 hours)
 
     steps:
     - name: Checkout code
@@ -20,15 +21,36 @@ jobs:
       with:
         node-version: '20'
 
-    - name: Install FFmpeg
+    - name: Install System Dependencies
       run: |
-        sudo apt update
-        sudo apt install -y ffmpeg
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg curl python3
 
-    - name: Install Dependencies
+    - name: Download yt-dlp
       working-directory: super-goggles-improved
-      run: npm install
+      run: |
+        curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o yt-dlp
+        chmod a+rx yt-dlp
+
+    - name: Install Bot Dependencies
+      working-directory: super-goggles-improved
+      run: |
+        npm install
+        npm list --depth=0 || true
+
+    - name: Verify Environment
+      working-directory: super-goggles-improved
+      run: |
+        node -v
+        npm -v
+        ffmpeg -version | head -n 1
+        ./yt-dlp --version
+        ls -la
 
     - name: Start Bot
       working-directory: super-goggles-improved
+      env:
+        # Pass necessary environment variables here if needed
+        # SESSION_ID: ${{ secrets.SESSION_ID }}
+        PORT: 5000
       run: npm start
