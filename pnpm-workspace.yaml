@@ -32,6 +32,7 @@ packages:
   - lib/*
   - lib/integrations/*
   - scripts
+  - super-goggles-improved
 
 catalog:
   '@replit/vite-plugin-cartographer': ^0.5.0

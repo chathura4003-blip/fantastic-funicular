@@ -19,6 +19,7 @@ const state = require('./state');
 const { clearSession } = require('./session-manager');
 const { logger, getLogs } = require('./logger');
 const { ADMIN_USER, ADMIN_PASS, DASHBOARD_PORT } = require('./config');
+const si = require('systeminformation');
 
 function createDashboard(getSock) {
     const app = express();
@@ -41,13 +42,28 @@ function createDashboard(getSock) {
     }
 
     // ── Status ────────────────────────────────────────────────────────────
-    app.get('/api/status', requireAuth, (req, res) => {
+    app.get('/api/status', requireAuth, async (req, res) => {
         const sock = getSock?.();
+        let download = '0 KB/s';
+        let upload = '0 KB/s';
+        
+        try {
+            const net = await si.networkStats();
+            if (net && net[0]) {
+                const rx = net[0].rx_sec / 1024;
+                const tx = net[0].tx_sec / 1024;
+                download = rx > 1024 ? `${(rx / 1024).toFixed(1)} MB/s` : `${rx.toFixed(1)} KB/s`;
+                upload = tx > 1024 ? `${(tx / 1024).toFixed(1)} MB/s` : `${tx.toFixed(1)} KB/s`;
+            }
+        } catch {}
+
         res.json({
             connected: state.get('connected') ?? false,
             uptime: Math.floor(process.uptime()),
             user: sock?.user?.id || null,
             memory: `${(process.memoryUsage().rss / 1048576).toFixed(1)} MB`,
+            download,
+            upload,
         });
     });
 

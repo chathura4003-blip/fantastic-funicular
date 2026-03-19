@@ -162,6 +162,8 @@
       <div class="stat"><span class="label">Account</span><span class="value" id="s-user">…</span></div>
       <div class="stat"><span class="label">Uptime</span><span class="value" id="s-up">…</span></div>
       <div class="stat"><span class="label">Memory</span><span class="value" id="s-mem">…</span></div>
+      <div class="stat"><span class="label">Download</span><span class="value green" id="s-down">0 KB/s</span></div>
+      <div class="stat"><span class="label">Upload</span><span class="value green" id="s-up-spd">0 KB/s</span></div>
     </div>
 
     <!-- QR -->
@@ -286,6 +288,8 @@
       document.getElementById('s-user').textContent = status.user || '—';
       document.getElementById('s-up').textContent   = fmtUp(status.uptime || 0);
       document.getElementById('s-mem').textContent  = status.memory || '—';
+      document.getElementById('s-down').textContent = status.download || '0 KB/s';
+      document.getElementById('s-up-spd').textContent = status.upload || '0 KB/s';
 
       const badge = document.getElementById('hdr-badge');
       badge.textContent = ok ? '⬤ Online' : '⬤ Offline';

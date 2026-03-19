@@ -1,0 +1,15 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "nixpacksConfig": {
+      "providers": ["node"],
+      "pkgs": ["ffmpeg", "python3"]
+    }
+  },
+  "deploy": {
+    "startCommand": "pnpm --filter supreme-md-bot start",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}

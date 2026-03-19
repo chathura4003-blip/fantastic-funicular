@@ -17,7 +17,7 @@ const { spawn } = require('child_process');
 const { logger } = require('../logger');
 const { DOWNLOAD_DIR, DOWNLOAD_CACHE_TTL } = require('../config');
 const { retryWithBackoff, handleAPIError } = require('./error-handler');
-const { getYtdlp, FFMPEG_PATH, fluentFfmpeg, BIN_PATH } = require('./ytdlp-manager');
+const { getYtdlp, FFMPEG_PATH, fluentFfmpeg, getBinPath } = require('./ytdlp-manager');
 
 // Ensure download directory exists
 if (!fs.existsSync(DOWNLOAD_DIR)) fs.mkdirSync(DOWNLOAD_DIR, { recursive: true });
@@ -236,7 +236,7 @@ async function _runDownload(sock, ph, url, quality, audioOnly) {
     ];
 
     let lastUpdate = 0;
-    const child = spawn(BIN_PATH, args, { windowsHide: true });
+    const child = spawn(getBinPath(), args, { windowsHide: true });
     const rl = readline.createInterface({ input: child.stdout });
 
     rl.on('line', (line) => {
