@@ -16,16 +16,14 @@ RUN npm install -g pnpm
 # Set working directory
 WORKDIR /app
 
-# Copy workspace and lock files
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY lib/db/package.json ./lib/db/
-COPY super-goggles-improved/package.json ./super-goggles-improved/
+# Copy the entire application First
+COPY . .
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
-# Copy the rest of the application
-COPY . .
+# Build everything
+RUN pnpm run build --if-present
 
 # Set environment variables
 ENV NODE_ENV=production
@@ -35,4 +33,4 @@ ENV PORT=5000
 EXPOSE 5000
 
 # Start the bot using the workspace filter
-CMD ["pnpm", "--filter", "supreme-md-bot", "start"]
+CMD ["pnpm", "start"]
