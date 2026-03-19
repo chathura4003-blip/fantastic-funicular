@@ -36,32 +36,42 @@ async function startBot() {
     logger(`[Bot] Starting ${BOT_NAME}…`);
 
     // Ensure yt-dlp is ready before accepting messages
+    logger('[Bot] Initializing yt-dlp…');
     await initYtdlp().catch(e => logger(`[Bot] yt-dlp warning: ${e.message}`));
 
     // Load commands from lib/commands/
+    logger('[Bot] Loading commands…');
     loadCommands();
 
+    logger('[Bot] Initialization complete, connecting…');
     return connect();
 }
 
 async function connect() {
     logger('[Bot] Initializing session...');
     const { state: authState, saveCreds } = await initSession();
+    
     logger('[Bot] Fetching Baileys version...');
-    const { version } = await fetchLatestBaileysVersion();
-    logger(`[Bot] Connecting to WA v${version.join('.')}...`);
+    let version = [2, 3000, 1015901307]; // Fallback version
+    try {
+        const latest = await fetchLatestBaileysVersion();
+        if (latest && latest.version) version = latest.version;
+        logger(`[Bot] Using Baileys v${version.join('.')}`);
+    } catch (err) {
+        logger(`[Bot] Using fallback Baileys v${version.join('.')} (fetch failed: ${err.message})`);
+    }
 
     sock = makeWASocket({
         version,
-        logger: pino({ level: 'silent' }),
+        logger: pino({ level: 'warn' }),
         auth: {
             creds: authState.creds,
-            keys: makeCacheableSignalKeyStore(authState.keys, pino({ level: 'silent' })),
+            keys: makeCacheableSignalKeyStore(authState.keys, pino({ level: 'warn' })),
         },
         browser: ['Chrome (Linux)', 'Chrome', '120.0.0'],
         markOnlineOnConnect: true,
-        retryRequestDelayMs: 2000,
-        maxMsgRetryCount: 3,
+        generateHighQualityLinkPreview: true,
+        getMessage: async (key) => { return { conversation: 'bot' } }
     });
 
     // ── Connection event ──────────────────────────────────────────────────
