@@ -23,8 +23,7 @@ COPY . .
 # Install dependencies only for the bot to save memory
 RUN pnpm install --filter supreme-md-bot... --reporter=append-only
 
-# Build the bot (if applicable)
-RUN pnpm run --filter supreme-md-bot build --if-present
+# Skip explicit build step as supreme-md-bot doesn't need to be built
 
 # Set environment variables
 ENV NODE_ENV=production
