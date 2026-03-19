@@ -1,5 +1,5 @@
-# Base image with Node.js 18
-FROM node:18-slim
+# Base image with Node.js 20 for stable crypto support
+FROM node:20-slim
 
 # Install system dependencies for yt-dlp and ffmpeg
 RUN apt-get update && apt-get install -y \

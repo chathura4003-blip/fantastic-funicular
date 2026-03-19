@@ -1,5 +1,10 @@
 'use strict';
 
+// Polyfill for Baileys/Nixpacks environments where global crypto might be missing
+if (!global.crypto) {
+    global.crypto = require('crypto');
+}
+
 /**
  * Entry point — starts the dashboard then the WhatsApp bot.
  * Usage: node index.js
