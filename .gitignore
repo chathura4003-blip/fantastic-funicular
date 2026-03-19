@@ -6,7 +6,6 @@ session/
 **/session/
 downloads/
 **/downloads/
-yt-dlp
 yt-dlp.exe
 **/*.png
 **/*.jpg

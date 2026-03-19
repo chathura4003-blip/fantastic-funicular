@@ -1,5 +1,14 @@
 [phases.setup]
-nixPkgs = ["nodePackages.pnpm", "ffmpeg", "python3"]
+nixPkgs = ["nodePackages_latest", "ffmpeg", "python3"]
+aptPkgs = ["libnss3", "libatk1.0-0", "libatk-bridge2.0-0", "libcups2", "libdrm2", "libxkbcommon0", "libxcomposite1", "libxdamage1", "libxext6", "libxfixes3", "libxrandr2", "libgbm1", "libasound2"]
 
 [phases.install]
-cmds = ["pnpm install"]
+dependsOn = ["setup"]
+cmds = ["npm install -g pnpm", "pnpm install"]
+
+[phases.build]
+dependsOn = ["install"]
+cmds = ["pnpm run build --if-present"]
+
+[start]
+cmd = "pnpm start"
